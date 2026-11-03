@@ -27,7 +27,7 @@ TEMPLATE = """
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Painel de Infra · {{ equipe }}</title>
+<title>Painel de Monitoramento · {{ equipe }}</title>
 <style>
   :root {
     --bg: #f5f5f7;
@@ -253,7 +253,7 @@ TEMPLATE = """
   </main>
 
 <script>
-  const INTERVALO = 2000; // ms
+  const INTERVALO = 500; // ms
 
   const $ = (id) => document.getElementById(id);
 
