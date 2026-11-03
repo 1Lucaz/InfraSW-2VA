@@ -253,7 +253,7 @@ TEMPLATE = """
   </main>
 
 <script>
-  const INTERVALO = 500; // ms
+  const INTERVALO = 800; // ms
 
   const $ = (id) => document.getElementById(id);
 
@@ -264,7 +264,6 @@ TEMPLATE = """
 
   async function atualizar() {
     try {
-      // mesma rota "/", só pede JSON em vez de HTML
       const r = await fetch("/", {
         headers: { "Accept": "application/json" },
         cache: "no-store"
