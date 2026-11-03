@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string
+from flask import Flask, render_template_string, request, jsonify
 import psutil
 import requests
 import socket
@@ -19,6 +19,8 @@ def obter_conselho_devops():
     except:
         return "Automatize tudo."
 
+psutil.cpu_percent(interval=None)  # "aquece" a leitura de CPU
+
 TEMPLATE = """
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -36,6 +38,8 @@ TEMPLATE = """
     --accent: #0071e3;
     --track: #e8e8ed;
     --nav: rgba(245, 245, 247, 0.72);
+    --ok: #30d158;
+    --bad: #ff453a;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -80,8 +84,13 @@ TEMPLATE = """
   nav .status { color: var(--muted); display: flex; align-items: center; gap: 8px; }
   nav .dot {
     width: 8px; height: 8px; border-radius: 50%;
-    background: #30d158;
+    background: var(--ok);
     box-shadow: 0 0 0 3px rgba(48, 209, 88, 0.2);
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+  nav .status.offline .dot {
+    background: var(--bad);
+    box-shadow: 0 0 0 3px rgba(255, 69, 58, 0.2);
   }
 
   main { max-width: 980px; margin: 0 auto; padding: 0 22px 80px; }
@@ -131,6 +140,7 @@ TEMPLATE = """
     font-weight: 700;
     letter-spacing: -0.04em;
     line-height: 1;
+    font-variant-numeric: tabular-nums;
   }
   .value small {
     font-size: 0.4em;
@@ -183,6 +193,7 @@ TEMPLATE = """
     text-align: center;
     font-size: 12px;
     color: var(--muted);
+    font-variant-numeric: tabular-nums;
   }
 
   @media (max-width: 700px) {
@@ -195,7 +206,7 @@ TEMPLATE = """
 <body>
   <nav>
     <span class="brand">{{ equipe }}</span>
-    <span class="status"><span class="dot"></span>Operacional</span>
+    <span class="status" id="status"><span class="dot"></span><span id="status-text">Operacional</span></span>
   </nav>
 
   <main>
@@ -209,16 +220,16 @@ TEMPLATE = """
       <div class="card">
         <div class="label">Uso de CPU</div>
         <div>
-          <div class="value">{{ cpu }}<small>%</small></div>
-          <div class="bar"><span style="width: {{ cpu }}%"></span></div>
+          <div class="value"><span id="cpu-val">{{ cpu }}</span><small>%</small></div>
+          <div class="bar"><span id="cpu-bar" style="width: {{ cpu }}%"></span></div>
         </div>
       </div>
 
       <div class="card">
         <div class="label">Uso de RAM</div>
         <div>
-          <div class="value">{{ ram }}<small>%</small></div>
-          <div class="bar"><span style="width: {{ ram }}%"></span></div>
+          <div class="value"><span id="ram-val">{{ ram }}</span><small>%</small></div>
+          <div class="bar"><span id="ram-bar" style="width: {{ ram }}%"></span></div>
         </div>
       </div>
 
@@ -238,8 +249,43 @@ TEMPLATE = """
       </div>
     </section>
 
-    <footer>Atualize a página para novas métricas.</footer>
+    <footer>Atualizado às <span id="updated">--:--:--</span></footer>
   </main>
+
+<script>
+  const INTERVALO = 2000; // ms
+
+  const $ = (id) => document.getElementById(id);
+
+  function setOnline(ok) {
+    $("status").classList.toggle("offline", !ok);
+    $("status-text").textContent = ok ? "Operacional" : "Sem conexão";
+  }
+
+  async function atualizar() {
+    try {
+      // mesma rota "/", só pede JSON em vez de HTML
+      const r = await fetch("/", {
+        headers: { "Accept": "application/json" },
+        cache: "no-store"
+      });
+      if (!r.ok) throw new Error(r.status);
+      const d = await r.json();
+
+      $("cpu-val").textContent = d.cpu;
+      $("cpu-bar").style.width = d.cpu + "%";
+      $("ram-val").textContent = d.ram;
+      $("ram-bar").style.width = d.ram + "%";
+      $("updated").textContent = new Date().toLocaleTimeString("pt-BR");
+      setOnline(true);
+    } catch (e) {
+      setOnline(false);
+    }
+  }
+
+  atualizar();
+  setInterval(atualizar, INTERVALO);
+</script>
 </body>
 </html>
 """
@@ -247,9 +293,16 @@ TEMPLATE = """
 @app.route('/')
 def home():
     memoria = psutil.virtual_memory()
-    cpu_percent = psutil.cpu_percent(interval=0.1)
+    cpu_percent = psutil.cpu_percent(interval=None)
 
-    return render_template_string(
+    # Mesma rota: se o navegador pedir JSON, devolve só os números
+    if request.accept_mimetypes.best == 'application/json':
+        resp = jsonify(cpu=cpu_percent, ram=memoria.percent)
+        resp.headers['Cache-Control'] = 'no-store'
+        resp.headers['Vary'] = 'Accept'
+        return resp
+
+    resp = app.make_response(render_template_string(
         TEMPLATE,
         equipe=EQUIPE,
         hostname=socket.gethostname(),
@@ -257,7 +310,9 @@ def home():
         cpu=cpu_percent,
         ram=memoria.percent,
         conselho=obter_conselho_devops(),
-    )
+    ))
+    resp.headers['Vary'] = 'Accept'
+    return resp
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80)
