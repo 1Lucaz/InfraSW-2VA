@@ -43,4 +43,4 @@ jobs:
             docker rm container-painel || true
             
             echo "Subindo o novo container na porta 80..."
-            docker run -d --name container-painel -p 80:80 imagem-painel
+            docker run -d --restart always --name container-painel -p 80:80 imagem-painel
