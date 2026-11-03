@@ -1,5 +1,3 @@
 flask
 psutil
-socket
-platform
 requests
