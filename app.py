@@ -6,20 +6,17 @@ import platform
 
 app = Flask(__name__)
 
-# ========================================================
-# NOME DA EQUIPE (Altere para testar o CI/CD!)
+
 EQUIPE = "Equipe Zetta"
-# ========================================================
 
 def obter_conselho_devops():
     try:
-        # Consome uma API externa de conselhos (Slip Advice API)
         resposta = requests.get("https://api.adviceslip.com/advice", timeout=2)
         return resposta.json()['slip']['advice']
     except:
         return "Automatize tudo."
 
-psutil.cpu_percent(interval=None)  # "aquece" a leitura de CPU
+psutil.cpu_percent(interval=None)
 
 TEMPLATE = """
 <!DOCTYPE html>
@@ -41,7 +38,7 @@ TEMPLATE = """
     --ok: #30d158;
     --bad: #ff453a;
   }
-  @media (prefers-color-scheme: dark) {
+  @media (prefers-color-scheme: light) {
     :root {
       --bg: #000000;
       --card: #1c1c1e;
@@ -294,7 +291,6 @@ def home():
     memoria = psutil.virtual_memory()
     cpu_percent = psutil.cpu_percent(interval=None)
 
-    # Mesma rota: se o navegador pedir JSON, devolve só os números
     if request.accept_mimetypes.best == 'application/json':
         resp = jsonify(cpu=cpu_percent, ram=memoria.percent)
         resp.headers['Cache-Control'] = 'no-store'
