@@ -38,7 +38,7 @@ TEMPLATE = """
     --ok: #30d158;
     --bad: #ff453a;
   }
-  @media (prefers-color-scheme: light) {
+  @media (prefers-color-scheme: dark) {
     :root {
       --bg: #000000;
       --card: #1c1c1e;
