@@ -7,7 +7,7 @@ import platform
 app = Flask(__name__)
 
 
-EQUIPE = "Equipe Sierra"
+EQUIPE = "Equipe Alfa"
 
 def obter_conselho_devops():
     try:
@@ -38,7 +38,7 @@ TEMPLATE = """
     --ok: #30d158;
     --bad: #ff453a;
   }
-  @media (prefers-color-scheme: dark) {
+  @media (prefers-color-scheme: light) {
     :root {
       --bg: #000000;
       --card: #1c1c1e;
