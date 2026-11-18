@@ -255,7 +255,7 @@ TEMPLATE = """
 
   function setOnline(ok) {
     $("status").classList.toggle("offline", !ok);
-    $("status-text").textContent = ok ? "Operacional" : "Sem conexão";
+    $("status-text").textContent = ok ? "Ativo" : "Sem conexão";
   }
 
   async function atualizar() {
