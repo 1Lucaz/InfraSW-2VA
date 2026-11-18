@@ -203,7 +203,7 @@ TEMPLATE = """
 <body>
   <nav>
     <span class="brand">{{ equipe }}</span>
-    <span class="status" id="status"><span class="dot"></span><span id="status-text">Operacional</span></span>
+    <span class="status" id="status"><span class="dot"></span><span id="status-text">Ativo</span></span>
   </nav>
 
   <main>
