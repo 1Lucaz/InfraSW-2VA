@@ -209,8 +209,7 @@ TEMPLATE = """
   <main>
     <header>
       <div class="eyebrow">{{ equipe }}</div>
-      <h1>Painel de Infra.</h1>
-      <p>Telemetria do servidor em tempo real.</p>
+      <h1>Painel de Monitoramento.</h1>
     </header>
 
     <section class="grid">
