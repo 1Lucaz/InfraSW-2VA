@@ -7,7 +7,7 @@ import platform
 app = Flask(__name__)
 
 
-EQUIPE = "Equipe Zetta"
+EQUIPE = "Equipe Sierra"
 
 def obter_conselho_devops():
     try:
